@@ -54,126 +54,113 @@ function LoginPage() {
     }
   };
 
-  const handleGoogleLoginSuccess = (response) => {
-    console.log("Google Login Success", response);
-    localStorage.setItem("googleToken", response.credential);
-    navigate("/");
-  };
-
-  const handleGoogleLoginFailure = (error) => {
-    console.error("Google Login Failed", error);
-    setError("Failed to login with Google");
-  };
-
-
   return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-800">
-        <div className="flex bg-white rounded-xl shadow-lg w-full max-w-7xl h-auto">
-          <div className="hidden md:block w-1/2 bg-gray-100">
+    <div className="flex h-screen w-full items-center justify-center bg-gray-800">
+      <div className="flex bg-white rounded-xl shadow-lg w-full max-w-7xl h-auto">
+        <div className="hidden md:block w-1/2 bg-gray-100">
+          <img
+            src="/cart.webp"
+            alt="img"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="w-full md:w-1/2 p-8 bg-white">
+          <div className="text-center">
             <img
               src="/cart.webp"
-              alt="img"
-              className="w-full h-full object-cover"
+              alt="Logo"
+              className="mx-auto h-24 object-cover mb-6"
             />
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              Welcome back!
+            </h2>
+            <p className="text-gray-500 mb-6">Please enter your details</p>
           </div>
 
-          <div className="w-full md:w-1/2 p-8 bg-white">
-            <div className="text-center">
-              <img
-                src="/cart.webp"
-                alt="Logo"
-                className="mx-auto h-24 object-cover mb-6"
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium mb-2 text-gray-600 text-start ml-20"
+              >
+                Email
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="w-3/4 px-4 py-2 mt-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Enter your email"
+                required
               />
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                Welcome back!
-              </h2>
-              <p className="text-gray-500 mb-6">Please enter your details</p>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium mb-2 text-gray-600 text-start ml-20"
-                >
-                  Email
-                </label>
+            <div className="mb-4">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-2 text-gray-600 text-start ml-20"
+              >
+                Password
+              </label>
+              <div className="relative">
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
                   onChange={handleInputChange}
                   className="w-3/4 px-4 py-2 mt-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Enter your email"
+                  placeholder="Enter your password"
                   required
                 />
               </div>
+            </div>
 
-              <div className="mb-4">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium mb-2 text-gray-600 text-start ml-20"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="w-3/4 px-4 py-2 mt-2 text-gray-900 bg-gray-200 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Enter your password"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-around mb-6 ">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    name="rememberMe"
-                    checked={formData.rememberMe}
-                    onChange={handleInputChange}
-                    className="form-checkbox text-indigo-500 mt-4"
-                  />
-                  <span className="ml-2 text-sm mt-4 text-gray-600">
-                    Remember for 30 days
-                  </span>
-                </label>
-                <a
-                  href="#"
-                  className="text-sm mt-4 text-indigo-500 hover:underline"
-                >
-                  Forgot password?
-                </a>
-              </div>
-
-              <button
-                type="submit"
-                className="w-3/4 bg-gray-900 mt-2 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-300"
-                disabled={loading}
+            <div className="flex items-center justify-around mb-6 ">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="rememberMe"
+                  checked={formData.rememberMe}
+                  onChange={handleInputChange}
+                  className="form-checkbox text-indigo-500 mt-4"
+                />
+                <span className="ml-2 text-sm mt-4 text-gray-600">
+                  Remember for 30 days
+                </span>
+              </label>
+              <a
+                href="#"
+                className="text-sm mt-4 text-indigo-500 hover:underline"
               >
-                {loading ? "Logging in..." : "Log In"}
-              </button>
+                Forgot password?
+              </a>
+            </div>
 
-              {error && <p className="text-red-500 mt-4">{error}</p>}
-            </form>
+            <button
+              type="submit"
+              className="w-3/4 bg-gray-900 mt-2 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-300"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
 
-            <p className="text-center text-sm text-gray-500 mt-4">
-              Don’t have an account?{" "}
-              <Link to="/register" className="text-indigo-500 hover:underline">
-                Sign Up
-              </Link>
-            </p>
-          </div>
+            {error && <p className="text-red-500 mt-4">{error}</p>}
+          </form>
+
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Don’t have an account?{" "}
+            <Link to="/register" className="text-indigo-500 hover:underline">
+              Sign Up
+            </Link>
+          </p>
         </div>
       </div>
+    </div>
   );
-
 }
 
-export default BlogPage
+export default LoginPage;
