@@ -1,154 +1,197 @@
 import React, { useState, useEffect } from 'react';
 import { FaEdit, FaSave, FaSignOutAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [userInfo, setUserInfo] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    password: '',
-    phone: '',
-    address: '',
-    additionalInfo: '',
+    phoneNumber: '',
+    bio: '',
   });
 
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(userInfo);
+  const [profileImage, setProfileImage] = useState(null); 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchUserInfo = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get('https://students-hackaton.vercel.app/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUserInfo(response.data);
+      setProfileImage(response.data.avatar); 
+    } catch (error) {
+      alert('Error fetching user data, please try again later.');
+    }
+  };
 
   useEffect(() => {
-    const fetchedUserInfo = {
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      password: 'password123',
-      phone: '123-456-7890',
-      address: '123 Main St, Cityville, ST 12345',
-      additionalInfo: 'This is some additional info about John.',
-    };
-    setUserInfo(fetchedUserInfo);
-    setFormData(fetchedUserInfo);
+    fetchUserInfo();
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setUserInfo({ ...userInfo, [name]: value });
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    setUserInfo(formData);
-    setIsEditing(false);
-    alert('Profile updated successfully!');
+  const handleSave = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.post('https://students-hackaton.vercel.app/user/update', userInfo, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Profile updated successfully!');
+      setIsEditing(false);
+      fetchUserInfo(); 
+    } catch (error) {
+      alert('Error updating profile, please try again later.');
+    }
   };
 
   const handleLogout = () => {
     navigate('/login');
   };
 
+  const handleImageChange = async (event) => {
+    setLoading(true);
+    setError(null);
+
+    const token = localStorage.getItem('token');
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await axios.post("https://students-hackaton.vercel.app/upload/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("Image uploaded successfully:", response.data);
+      const avatarUrl = response.data.url;
+
+      const updateResponse = await fetch('https://students-hackaton.vercel.app/user/change-profile', {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ avatar: avatarUrl }),
+      });
+
+      if (!updateResponse.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      setProfileImage(avatarUrl); 
+      fetchUserInfo(); 
+    } catch (err) {
+      setError('Failed to upload and update image.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center h-screen bg-gray-800">
-      <div className='bg-gray-300 p-6 rounded-lg shadow-lg w-1/2'>
-        <div className="flex flex-col items-center mb-6 p-6">
-          <img
-            src="/cart.webp"
-            alt="Profile"
-            className="h-32 w-32 rounded-full border-4 border-gray-300 mb-4"
+      <div className="bg-gray-300 p-6 rounded-lg shadow-lg w-1/2"> 
+        <div className="flex flex-col items-center mb-6">
+          <div className="relative w-32 h-32 mb-4">
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="w-full h-full rounded-full object-cover border-4 border-blue-500"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center border-4 border-gray-400">
+                <span className="text-gray-700">No Image</span>
+              </div>
+            )}
+          </div>
+          <label htmlFor="profileImage" className="cursor-pointer text-blue-600 hover:underline">
+            Upload Image
+          </label>
+          <input
+            type="file"
+            id="profileImage"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
           />
+        </div>
+
+        <h2 className="font-bold mb-10 text-2xl text-center">User Information</h2>
+    
+        <div className="flex flex-col space-y-4 text-xl">
+          {['firstName', 'lastName', 'email', 'phoneNumber'].map((field) => (
+            <div key={field} className="flex justify-between bg-slate-200 p-6 rounded-lg text-left">
+              <label className="text-gray-700">{field.replace(/([A-Z])/g, ' $1')}: </label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  name={field}
+                  value={userInfo[field]}
+                  onChange={handleChange}
+                  className="border rounded p-2 w-2/3"
+                />
+              ) : (
+                <p className="text-gray-800 w-2/3">{userInfo[field]}</p>
+              )}
+            </div>
+          ))}
           {isEditing && (
-            <input type="file" accept="image/*" className="mb-4" />
+            <div className="flex justify-between bg-slate-200 p-4 rounded-lg">
+              <label className="text-gray-700">Bio:</label>
+              <textarea
+                name="bio"
+                value={userInfo.bio}
+                onChange={handleChange}
+                className="border rounded p-2 w-2/3"
+              />
+            </div>
           )}
         </div>
 
-        <h2 className="text-2xl font-bold mb-4 text-center">User Information</h2>
-        <div className='flex justify-center'>
-          <div className="bg-white p-10 w-3/4 rounded-lg shadow-md ">
-            <div className="flex flex-col space-y-4 text-lg ">
-              {[
-                { label: 'Full Name', name: 'fullName', type: 'text' },
-                { label: 'Email', name: 'email', type: 'email' },
-                { label: 'Phone Number', name: 'phone', type: 'tel' },
-                { label: 'Address', name: 'address', type: 'text' },
-                { label: 'Password', name: 'password', type: 'password' },
-                { label: 'Additional Info', name: 'additionalInfo', type: 'textarea' }
-              ].map(({ label, name, type }) => (
-                <div className="flex " key={name}>
-                  <span className="block text-gray-700 w-1/3">{label}:</span>
-                  {isEditing ? (
-                    type === 'textarea' ? (
-                      <textarea
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                        className="border rounded p-2 w-2/3 "
-                        rows="3"
-                      />
-                    ) : (
-                      <input
-                        type={type}
-                        name={name}
-                        value={formData[name]}
-                        onChange={handleChange}
-                        className="border rounded p-2 w-2/3 "
-                        required
-                      />
-                    )
-                  ) : (
-                    <p className="text-gray-800 w-2/3">{userInfo[name]}</p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end mt-6 space-x-4 p-6">
+        <div className="flex justify-end mt-6 space-x-4">
           {isEditing ? (
             <>
-              <button
-                onClick={handleSave}
-                className="bg-blue-600 text-white px-4 py-2 rounded flex "
-              >
+              <button onClick={handleSave} className="bg-blue-600 text-white px-4 py-2 rounded flex">
                 <FaSave className="mr-2" /> Save
               </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-              >
+              <button onClick={() => setIsEditing(false)} className="bg-gray-300 text-gray-700 px-4 py-2 rounded">
                 Cancel
               </button>
             </>
           ) : (
             <>
-              <button
-                onClick={handleEdit}
-                className="bg-blue-600 text-white px-4 py-2 rounded flex items-center"
-              >
+              <button onClick={() => setIsEditing(true)} className="bg-blue-600 text-white px-4 py-2 rounded flex">
                 <FaEdit className="mr-2" /> Edit
               </button>
-
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded flex items-center"
-              >
+              <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded flex">
                 <FaSignOutAlt className="mr-2" /> Logout
               </button>
             </>
           )}
         </div>
-
       </div>
     </div>
   );
 };
 
 export default ProfilePage;
-
-
-
-
-
-
-

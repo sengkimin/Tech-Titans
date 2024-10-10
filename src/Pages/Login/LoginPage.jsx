@@ -65,6 +65,7 @@ function LoginPage() {
     setError("Failed to login with Google");
   };
 
+
   return (
       <div className="flex h-screen w-full items-center justify-center bg-gray-800">
         <div className="flex bg-white rounded-xl shadow-lg w-full max-w-7xl h-auto">
@@ -172,6 +173,7 @@ function LoginPage() {
         </div>
       </div>
   );
+
 }
 
-export default LoginPage;
+export default BlogPage
