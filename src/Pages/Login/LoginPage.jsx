@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ function LoginPage() {
   });
 
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -18,11 +21,34 @@ function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     if (formData.email && formData.password) {
-      navigate("/"); 
+      try {
+        const response = await axios.post(
+          "https://students-hackaton.vercel.app/user/sign-in",
+          {
+            email: formData.email,
+            password: formData.password,
+          }
+        );
+
+        const token = response.data.token;
+
+        if (token) {
+          localStorage.setItem("token", token);
+          navigate("/");
+        } else {
+          setError("Invalid login credentials");
+        }
+      } catch (err) {
+        setError("Failed to login. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     } else {
       alert("Please fill in all fields.");
     }
@@ -102,9 +128,14 @@ function LoginPage() {
                   onChange={handleInputChange}
                   className="form-checkbox text-indigo-500 mt-4"
                 />
-                <span className="ml-2 text-sm mt-4 text-gray-600">Remember for 30 days</span>
+                <span className="ml-2 text-sm mt-4 text-gray-600">
+                  Remember for 30 days
+                </span>
               </label>
-              <a href="#" className="text-sm mt-4 text-indigo-500 hover:underline">
+              <a
+                href="#"
+                className="text-sm mt-4 text-indigo-500 hover:underline"
+              >
                 Forgot password?
               </a>
             </div>
@@ -112,22 +143,12 @@ function LoginPage() {
             <button
               type="submit"
               className="w-3/4 bg-gray-900 mt-2 text-white py-2 rounded-lg hover:bg-gray-700 transition duration-300"
+              disabled={loading}
             >
-              Log In
+              {loading ? "Logging in..." : "Log In"}
             </button>
-            <div className="flex justify-center items-center">
-              <button
-                type="button"
-                className="w-3/4 bg-white border border-gray-300 text-gray-900 py-2 rounded-lg mt-6 hover:bg-gray-100 transition duration-300 flex items-center justify-center space-x-2"
-              >
-                <img
-                  src="https://img.icons8.com/color/48/000000/google-logo.png"
-                  alt="Google"
-                  className="w-5 h-5"
-                />
-                <span>Log in with Google</span>
-              </button>
-            </div>
+
+            {error && <p className="text-red-500 mt-4">{error}</p>}
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-4">
@@ -143,3 +164,4 @@ function LoginPage() {
 }
 
 export default LoginPage;
+
