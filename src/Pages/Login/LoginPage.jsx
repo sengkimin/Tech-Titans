@@ -1,12 +1,12 @@
 import React from 'react'
 
-const LoginPage = () => {
+const BlogPage = () => {
   return (
     <div>
-        <h1 className='text-red-600 font-bold text-2xl'>Login Page</h1>
+        <h1 className='text-red-600 font-bold text-2xl'>Loing Page</h1>
       
     </div>
   )
 }
 
-export default LoginPage;
+export default BlogPage
