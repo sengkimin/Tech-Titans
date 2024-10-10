@@ -2,10 +2,6 @@ import React from 'react'
 
 const RegisterPage = () => {
   return (
-
-    <div>
-        <h1 className='text-red-600 font-bold text-2xl'>Register Page</h1>
-
     <div className="flex min-h-screen">
       <div className="w-2/5 bg-gray-900 text-white p-12 items-center">
         <img src="/cart.webp" alt="Logo" className="mb-8 w-32 rounded-full" />
@@ -85,9 +81,8 @@ const RegisterPage = () => {
         </div>
       </div>
 
-
     </div>
   );
 }
 
-export default RegisterPage;
+export default RegisterPage
