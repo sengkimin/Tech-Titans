@@ -4,6 +4,7 @@ import LoginPage from './Pages/Login/LoginPage';
 import RegisterPage from './Pages/SignUp/SignUpPage';
 import BlogPage from './Pages/Blog/BlogPage';
 import ProfilePage from './Pages/Profile/ProfilePage';
+import ViewPage from './Pages/View/ViewPage';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage/>}></Route>
         <Route path="/register" element={<RegisterPage/>}></Route>
         <Route path="/profile" element={<ProfilePage/>}></Route>
+        <Route path="/view" element={<ViewPage />}></Route>
         
 
  
