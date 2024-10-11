@@ -17,7 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage/>}></Route>
         <Route path="/register" element={<RegisterPage/>}></Route>
         <Route path="/profile" element={<ProfilePage/>}></Route>
-        <Route path="/view" element={<ViewPage />}></Route>
+        <Route path="/blog/:id" element={<ViewPage />}></Route>
         
 
  
