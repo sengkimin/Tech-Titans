@@ -16,9 +16,8 @@ const Modal = ({ onClose, modalData, setModalData}) => {
     try {
       const formData = new FormData();
       if (thumbnailFile) {
-        formData.append("file", thumbnailFile); // Append the file directly
+        formData.append("file", thumbnailFile); 
 
-        // Step 1: Upload the thumbnail
         const uploadResponse = await axios.post("https://students-hackaton.vercel.app/upload/upload-image", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -29,7 +28,6 @@ const Modal = ({ onClose, modalData, setModalData}) => {
         console.log("Image uploaded successfully:", uploadResponse.data);
         const thumbnailUrl = uploadResponse.data.url;
 
-        // Step 2: Create the article with the uploaded thumbnail URL
         const articleData = { title, desc, thumbnail: thumbnailUrl };
         
         const articleResponse = await fetch("https://students-hackaton.vercel.app/blog/create-blog", {
@@ -48,9 +46,8 @@ const Modal = ({ onClose, modalData, setModalData}) => {
 
         const data = await articleResponse.json();
         console.log("Article created:", data);
-        onClose(); // Close the modal after saving
+        onClose();
       } else {
-        // If there's no thumbnail, just create the article without it
         const articleData = { title, desc };
         const articleResponse = await fetch("https://students-hackaton.vercel.app/blog/create-blog", {
           method: "POST",
@@ -68,7 +65,7 @@ const Modal = ({ onClose, modalData, setModalData}) => {
 
         const data = await articleResponse.json();
         console.log("Article created:", data);
-        onClose(); // Close the modal after saving
+        onClose(); 
       }
     } catch (err) {
       setError('Failed to upload and create article.');

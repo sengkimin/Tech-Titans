@@ -1,7 +1,9 @@
+
 import React, { Fragment, useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaSave } from "react-icons/fa";
 import Navbar from "../../Component/Navbar";
 import Modal from "../../Component/Modal";
+import { Link } from 'react-router-dom';
 
 const BlogPage = () => {
   const [articles, setArticles] = useState([]);
@@ -10,40 +12,39 @@ const BlogPage = () => {
   const [modalData, setModalData] = useState({ title: "", content: "", thumbnail: "" });
   const token = localStorage.getItem("token");
 
-  
-    const fetchArticles = async (url) => {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchArticles = async (url) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch articles");
-        }
-
-        const data = await response.json();
-
-        if (Array.isArray(data.blogs)) {
-          setArticles(data.blogs);
-        } else {
-          console.error("Expected data to be an array:", data.blogs);
-          setArticles([]);
-        }
-      } catch (error) {
-        console.error("Error fetching articles:", error);
+      if (!response.ok) {
+        throw new Error("Failed to fetch articles");
       }
-    };
 
-    useEffect(() => {
-      fetchArticles("https://students-hackaton.vercel.app/blog/get-all-blogs");
+      const data = await response.json();
+
+      if (Array.isArray(data.blogs)) {
+        setArticles(data.blogs);
+      } else {
+        console.error("Expected data to be an array:", data.blogs);
+        setArticles([]);
+      }
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchArticles("https://students-hackaton.vercel.app/blog/get-all-blogs");
   }, []);
 
   const handleEdit = (article) => {
     setEditArticle(article);
-    setModalData(article); // Set modal data for editing
-    setModalVisible(true); // Open modal for editing
+    setModalData(article); 
+    setModalVisible(true); // Open the modal for editing
   };
 
   const handleDelete = async (articleId) => {
@@ -65,49 +66,64 @@ const BlogPage = () => {
     }
   };
 
-  const handleSave = () => {
-    setArticles(articles.map(article =>
-      article.id === editArticle.id ? editArticle : article
-    ));
-    setEditArticle(null);
-    setModalVisible(false); // Close modal after saving
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`https://students-hackaton.vercel.app/blog/update-blog/${editArticle.id}`, {
+        method: 'PUT', // or 'PATCH'
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editArticle),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update article");
+      }
+
+      const updatedArticle = await response.json();
+      setArticles(articles.map(article => 
+        article.id === updatedArticle.id ? updatedArticle : article
+      ));
+      alert('Article updated successfully!');
+      setModalVisible(false); // Close the modal after saving
+      setEditArticle(null); // Reset the edit article state
+    } catch (error) {
+      console.error("Error updating article:", error);
+      alert('Error updating article, please try again later.');
+    }
   };
 
   const handleNewArticleSave = (newArticle) => {
-    setArticles([...articles, newArticle]); // Update local state with new article
-    setModalVisible(false); // Close modal after saving
+    setArticles([...articles, newArticle]);
+    setModalVisible(false); 
   };
 
   return (
     <Fragment>
       <div className="container mx-auto p-6">
-    
         <Navbar />
-        <div className='flex fixed top-0 w-[20%]'>
-              <button
-                onClick={() => fetchArticles('https://students-hackaton.vercel.app/blog/get-all-blog-public')}
-                className='w-[150%] py-2 text-black  mt-10 rounded border-white hover:bg-blue-800'
-              >
-                GET ALL PUBLIC BLOGS
-              </button>
-              <button
-                onClick={() => fetchArticles('https://students-hackaton.vercel.app/blog/get-all-blogs')}
-                className='w-[100%] py-2 text-black  mt-10 rounded border-white hover:bg-blue-800 ml-3'
-              >
-                GET ALL BLOGS
-              </button>
-            </div>
-        
-      
-        
+        <div className='flex fixed top-0 w-[25%] ml-10 text-xl'>
+          <button
+            onClick={() => fetchArticles('https://students-hackaton.vercel.app/blog/get-all-blog-public')}
+            className='w-[150%] py-2 text-gray-700  mt-8 rounded border-white hover:text-blue-800'
+          >
+            GET ALL PUBLIC BLOGS
+          </button>
+          <button
+            onClick={() => fetchArticles('https://students-hackaton.vercel.app/blog/get-all-blogs')}
+            className='w-[100%] py-2 text-gray-700  mt-8 rounded border-white hover:text-blue-800 ml-2'
+          >
+            GET OWN BLOGS
+          </button>
+        </div>
 
         <div className="mt-[100px]">
           <header className="text-center">
             <h1 className="text-4xl font-bold my-4">
               Best Strategy to Achieve Profitable Harvest
             </h1>
-            
-            <p className="text-gray-600 max-w-4xl text-xl mx-auto">
+            <p className="text-gray-600 max-w-4xl text-lg mx-auto">
               Expert strategies for improving farm yields, choosing the right crop varieties, and maximizing profit.
             </p>
           </header>
@@ -117,26 +133,20 @@ const BlogPage = () => {
               alt="Harvest Strategy"
               className="w-1/2 object-cover"
             />
-            <section className="prose prose-lg max-w-6xl text-2xl mt-20  ml-8">
+            <section className="prose prose-lg max-w-6xl text-2xl mt-20 ml-8">
               <p>
                 A successful and profitable harvest requires careful planning,
                 from choosing the right crops to using effective management
                 practices. Follow these tips to achieve the best possible results.
-              
-             
                 Choosing high-quality seeds and crop varieties suited to your
                 environment and market demands is essential for a profitable
                 harvest.
-           
-        
                 Timely and efficient crop management, including pest control,
                 irrigation, and fertilization, ensures that your crops are
                 healthy and productive.
-       
                 Embracing modern farming technologies, such as sensors and
                 precision agriculture, can help optimize crop yields and reduce
                 waste.
-         
                 Harvesting at the right time ensures maximum yield and quality.
                 Monitor your crops closely to determine the optimal harvest
                 window.
@@ -146,83 +156,49 @@ const BlogPage = () => {
         </div>
 
         <section>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-16">
             <h2 className="text-2xl font-bold">Related Articles</h2>
             <button
               onClick={() => {
                 setModalVisible(true);
                 setModalData({ title: "", content: "", thumbnail: "" }); 
               }}
-              className="text-2xl font-bold bg-blue-700 rounded-md p-4 text-white"
+              className="text-xl bg-blue-300 rounded-md p-4 text-black"
             >
-              Create New Blog
+              CREATE NEW BLOG
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.length > 0 ? (
               articles.map((article) => (
-                <div
-                  key={article.id}
-                  className="bg-white shadow-lg rounded-lg overflow-hidden"
-                >
-                  <img
-                    src={article.thumbnail}
-                    alt={article.title}
-                    className="object-cover w-full h-48"
-                  />
+                <div key={article.id} className="bg-white shadow-lg rounded-lg overflow-hidden">
+                  <Link to={`/blog/${article._id}`}>
+                    <img
+                      src={article.thumbnail}
+                      alt={article.title}
+                      className="object-cover w-full h-48"
+                    />
+                  </Link>
                   <div className="p-4">
-                    {editArticle && editArticle.id === article.id ? (
-                      <>
-                        <input
-                          type="text"
-                          value={editArticle.title}
-                          onChange={(e) =>
-                            setEditArticle({
-                              ...editArticle,
-                              title: e.target.value,
-                            })
-                          }
-                          className="border p-2 rounded w-full mb-2"
-                        />
-                        <textarea
-                          value={editArticle.content}
-                          onChange={(e) =>
-                            setEditArticle({
-                              ...editArticle,
-                              content: e.target.value,
-                            })
-                          }
-                          className="border p-2 rounded w-full mb-2"
-                          rows="2"
-                        />
-                        <button
-                          onClick={handleSave}
-                          className="bg-blue-600 text-white px-4 py-2 rounded"
-                        >
-                          <FaSave />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <h3 className="text-lg font-bold mb-2">{article.title}</h3>
-                        <p className="text-gray-600">{article.content}</p>
-                        <div className="flex space-x-4 mt-4">
-                          <button
-                            onClick={() => handleEdit(article)}
-                            className="text-blue-600 hover:text-blue-800"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(article.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <FaTrash />
-                          </button>
-                        </div>
-                      </>
-                    )}
+                    <Link to={`blog/${article._id}`}>
+                      <h3 className="text-lg font-bold mb-2">{article.title}</h3>
+                    </Link>
+                    <p className="text-gray-600">{article.content}</p>
+                    <div className="flex space-x-4 mt-4">
+                      <button
+                        onClick={() => handleEdit(article)} // Open modal for editing
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(article._id)}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -232,17 +208,11 @@ const BlogPage = () => {
           </div>
         </section>
 
-        {modalVisible && (
-          <Modal
-            onClose={() => setModalVisible(false)}
-            modalData={modalData} // Pass the modalData
-            setModalData={setModalData} // Pass the setModalData
-            onSave={handleNewArticleSave} // Pass the save function
-          />
-        )}
+
       </div>
     </Fragment>
   );
 };
 
 export default BlogPage;
+
