@@ -43,7 +43,7 @@ const ProfilePage = () => {
     setIsEditing(false);
     alert('Profile updated successfully!');
   };
-
+  
   const handleLogout = () => {
     navigate('/login');
   };
