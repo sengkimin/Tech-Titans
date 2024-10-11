@@ -53,7 +53,7 @@ const ProfilePage = () => {
       alert('Error updating profile, please try again later.');
     }
   };
-
+  
   const handleLogout = () => {
     navigate('/login');
   };
