@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect  } from 'react';
+import { useParams,useNavigate  } from 'react-router-dom';
 import axios from 'axios';
+import CircleLoader from "react-spinners/CircleLoader";
+
 
 
 const View = () => {
@@ -9,6 +11,13 @@ const View = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const override = {
+    display: "block",
+    margin: "0 auto",
+    borderColor: "black",
+  };
+
 
   useEffect(() => {
     const fetchBlogData = async () => {
@@ -30,8 +39,17 @@ const View = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center text-lg">Loading...</div>;
+    return  <div className="flex items-center justify-center h-screen">
+    <CircleLoader
+      loading={loading}
+      cssOverride={override}
+      size={150}
+      aria-label="Loading Spinner"
+      data-testid="loader"
+    />
+  </div>
   }
+ 
 
   if (error) {
     return <div className="text-center text-red-500">{error}</div>;
@@ -39,6 +57,9 @@ const View = () => {
 
   return (
     <div className="container mx-auto p-6">
+    
+    
+    
       <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200">
         <div className="flex items-center">
           <img
@@ -48,6 +69,7 @@ const View = () => {
           />
           <span className="ml-2 text-2xl font-bold text-gray-900">Tech Titans</span>
         </div>
+        
 
         <nav className="hidden md:flex space-x-12 text-lg">
           <a href="#" className="text-gray-700 hover:text-blue-700 transition duration-200">Home</a>
@@ -62,14 +84,22 @@ const View = () => {
           </button>
         </div>
       </header>
+      <div className='flex justify-start ml-44 mt-6'>
+      <button 
+        onClick={() => navigate('/')} 
+        className='bg-slate-300 text-lg w-28 h-10 rounded'
+      >
+        Back 
+      </button>
+    </div>
 
       <div className="flex justify-center my-10">
-        <article className="shadow-lg rounded-lg w-full lg:w-3/4 p-6 bg-slate-100">
+        <article className="shadow-lg rounded-lg w-full lg:w-3/4 p-10 bg-slate-100">
           <div className="flex justify-center">
             <img
               src={blogData?.thumbnail || "https://via.placeholder.com/400"}
               alt={blogData?.title || "Blog Image"}
-              className="w-full lg:w-1/2 object-cover rounded-md"
+              className="w-full lg:w-3/4 object-cover rounded-md shadow-sm"
             />
           </div>
 
